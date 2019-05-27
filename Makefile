@@ -6,7 +6,7 @@ OBJ	        = main.o
 
 default: $(EXE)
 
-main.o: main.cu blur.cu 
+main.o: main.cu blur.cu util.cu reference_cal.cu
 	$(NVCC) -c -o $@ main.cu $(NVCC_FLAGS)
 
 
