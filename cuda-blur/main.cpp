@@ -1,7 +1,7 @@
 //Udacity HW2 Driver
 
 #include <iostream>
-#include "timer.h"
+// #include "timer.h"
 #include "utils.h"
 #include <string>
 #include <stdio.h>
@@ -58,14 +58,14 @@ int main(int argc, char **argv) {
              &h_filter, &filterWidth, input_file);
 
   allocateMemoryAndCopyToGPU(numRows(), numCols(), h_filter, filterWidth);
-  GpuTimer timer;
-  timer.Start();
+  // GpuTimer timer;
+  // timer.Start();
   //call the students' code
   your_gaussian_blur(h_inputImageRGBA, d_inputImageRGBA, d_outputImageRGBA, numRows(), numCols(),
                      d_redBlurred, d_greenBlurred, d_blueBlurred, filterWidth);
-  timer.Stop();
+  // timer.Stop();
   cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
-  int err = printf("%f msecs.\n", timer.Elapsed());
+  // int err = printf("%f msecs.\n", timer.Elapsed());
 
   if (err < 0) {
     //Couldn't print! Probably the student closed stdout - bad news
