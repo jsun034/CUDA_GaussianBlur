@@ -100,7 +100,7 @@
 //****************************************************************************
 
 #include "reference_calc.cpp"
-#include <utils.h>
+#include "utils.h"
 
 __global__
 void gaussian_blur(const unsigned char* const inputChannel,
