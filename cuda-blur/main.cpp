@@ -63,11 +63,13 @@ int main(int argc, char **argv) {
 
   cudaDeviceSynchronize(); 
 
-  cudaFree(d_red);
-  cudaFree(d_green);
-  cudaFree(d_blue);
-
   //check results and output the blurred image
   postProcess(output_file);
+
+
+  cudaFree(d_redBlurred);
+  cudaFree(d_greenBlurred);
+  cudaFree(d_blueBlurred);
+
   return 0;
 }
