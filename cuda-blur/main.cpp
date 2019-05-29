@@ -1,9 +1,7 @@
-//Udacity HW2 Driver
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <iostream>
-//#include "timer.h"
 #include "util.cpp"
 #include <string>
 #include <stdio.h>
@@ -11,8 +9,8 @@
 
 using namespace cv;
 
-size_t numRows();  //return # of rows in the image
-size_t numCols();  //return # of cols in the image
+size_t numRows();  
+size_t numCols(); 
 
 void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
                 uchar4 **d_inputImageRGBA, uchar4 **d_outputImageRGBA,
@@ -34,12 +32,9 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
 void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsImage,
                                 const float* const h_filter, const size_t filterWidth);
 
-void cleanup();
-
-//include the definitions of the above functions for this homework
-//#include "HW2.cpp"
 
 int main(int argc, char **argv) {
+
   uchar4 *h_inputImageRGBA,  *d_inputImageRGBA;
   uchar4 *h_outputImageRGBA, *d_outputImageRGBA;
   unsigned char *d_redBlurred, *d_greenBlurred, *d_blueBlurred;
@@ -54,7 +49,7 @@ int main(int argc, char **argv) {
     output_file = std::string(argv[2]);
   }
   else {
-    std::cerr << "Usage: ./hw input_file output_file" << std::endl;
+    std::cerr << "Usage: ./filter input_file output_file" << std::endl;
     exit(1);
   }
   //load the image and give us our input and output pointers
@@ -63,30 +58,16 @@ int main(int argc, char **argv) {
              &h_filter, &filterWidth, input_file);
 
   allocateMemoryAndCopyToGPU(numRows(), numCols(), h_filter, filterWidth);
-//  GpuTimer timer;
-//  timer.Start();
-  //call the students' code
-  your_gaussian_blur(h_inputImageRGBA, d_inputImageRGBA, d_outputImageRGBA, numRows(), numCols(),
-                     d_redBlurred, d_greenBlurred, d_blueBlurred, filterWidth);
-//  timer.Stop();
-  cudaDeviceSynchronize(); 
-//checkCudaErrors(cudaGetLastError());
-//  int err = printf("%f msecs.\n", timer.Elapsed());
 
-/*
-  if (err < 0) {
-    //Couldn't print! Probably the student closed stdout - bad news
-    std::cerr << "Couldn't print timing information! STDOUT Closed!" << std::endl;
-    exit(1);
-  }
-*/
- // cleanup();
+  your_gaussian_blur(h_inputImageRGBA, d_inputImageRGBA, d_outputImageRGBA, numRows(), numCols(), d_redBlurred, d_greenBlurred, d_blueBlurred, filterWidth);
+
+  cudaDeviceSynchronize(); 
+
+  cudaFree(d_red);
+  cudaFree(d_green);
+  cudaFree(d_blue);
+
   //check results and output the blurred image
   postProcess(output_file);
-/*
-  checkCudaErrors(cudaFree(d_redBlurred));
-  checkCudaErrors(cudaFree(d_greenBlurred));
-  checkCudaErrors(cudaFree(d_blueBlurred));
-*/
   return 0;
 }
