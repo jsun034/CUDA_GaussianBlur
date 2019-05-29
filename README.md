@@ -5,5 +5,5 @@
 * Supports image formats such as jpeg and png
 
 ## To Run
-* "./comile.sh" generates an executable named "filter"
+* "./compile.sh" generates an executable named "filter" (may need to change specified file path)
 * ./filter inputImageName outputImageName
