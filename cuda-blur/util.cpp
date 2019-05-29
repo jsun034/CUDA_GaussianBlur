@@ -100,7 +100,7 @@ void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
 void postProcess(const std::string& output_file) {
   const int numPixels = numRows() * numCols();
   //copy the output back to the host
-//  checkCudaErrors(cudaMemcpy(imageOutputRGBA.ptr<unsigned char>(0), d_outputImageRGBA__, sizeof(uchar4) * numPixels, cudaMemcpyDeviceToHost));
+  cudaMemcpy(imageOutputRGBA.ptr<unsigned char>(0), d_outputImageRGBA__, sizeof(uchar4) * numPixels, cudaMemcpyDeviceToHost);
 
   cv::Mat imageOutputBGR;
   cv::cvtColor(imageOutputRGBA, imageOutputBGR, CV_RGBA2BGR);
