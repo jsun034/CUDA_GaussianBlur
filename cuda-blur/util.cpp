@@ -94,6 +94,12 @@ void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
     }
   }
 
+  cudaMalloc(d_redBlurred,    sizeof(unsigned char) * numPixels);
+  cudaMalloc(d_greenBlurred,  sizeof(unsigned char) * numPixels);
+  cudaMalloc(d_blueBlurred,   sizeof(unsigned char) * numPixels);
+  cudaMemset(*d_redBlurred,   0, sizeof(unsigned char) * numPixels);
+  cudaMemset(*d_greenBlurred, 0, sizeof(unsigned char) * numPixels);
+  cudaMemset(*d_blueBlurred,  0, sizeof(unsigned char) * numPixels);
 
 }
 
