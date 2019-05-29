@@ -31,7 +31,7 @@ void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
                 const std::string &filename) {
 
   //make sure the context initializes ok
-  //checkCudaErrors(cudaFree(0));
+  cudaFree(0);
 
   cv::Mat image = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR);
   if (image.empty()) {
@@ -56,12 +56,12 @@ void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
 
   const size_t numPixels = numRows() * numCols();
   //allocate memory on the device for both input and output
- // checkCudaErrors(cudaMalloc(d_inputImageRGBA, sizeof(uchar4) * numPixels));
- // checkCudaErrors(cudaMalloc(d_outputImageRGBA, sizeof(uchar4) * numPixels));
- // checkCudaErrors(cudaMemset(*d_outputImageRGBA, 0, numPixels * sizeof(uchar4))); //make sure no memory is left laying around
+  cudaMalloc(d_inputImageRGBA, sizeof(uchar4) * numPixels);
+  cudaMalloc(d_outputImageRGBA, sizeof(uchar4) * numPixels);
+  cudaMemset(*d_outputImageRGBA, 0, numPixels * sizeof(uchar4)); //make sure no memory is left laying around
 
   //copy input array to the GPU
-//  checkCudaErrors(cudaMemcpy(*d_inputImageRGBA, *h_inputImageRGBA, sizeof(uchar4) * numPixels, cudaMemcpyHostToDevice));
+ cudaMemcpy(*d_inputImageRGBA, *h_inputImageRGBA, sizeof(uchar4) * numPixels, cudaMemcpyHostToDevice);
 
   d_inputImageRGBA__  = *d_inputImageRGBA;
   d_outputImageRGBA__ = *d_outputImageRGBA;
