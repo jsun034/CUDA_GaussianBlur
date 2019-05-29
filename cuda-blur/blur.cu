@@ -96,10 +96,9 @@ void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsI
 
   
   //Allocate memory for the filter on the GPU
-  checkCudaErrors(&d_filter, sizeof(float) * filterWidth * filterWidth);
+  cudaMalloc(&d_filter, sizeof(float) * filterWidth * filterWidth);
 
   //Copy the filter on the host 
-  cudaMemcpy(dst, src, numBytes, cudaMemcpyHostToDevice);
   cudaMemcpy(d_filter, h_filter, sizeof(float) * filterWidth * filterWidth, cudaMemcpyHostToDevice);
 }
 
