@@ -1,12 +1,11 @@
 #! /bin/bash
 
 
-
 rm filter
 
 rm blur.o
 
 nvcc -c blur.cu
 
-nvcc -ccbin g++ -Xcompiler "-std=c++11" blur.o main.cpp reference_calc.cpp util.cpp -lcuda -lcudart -o filter
+nvcc -ccbin g++ blur.o main.cpp -I/usr/include/opencv -lopencv_core -lopencv_highgui -lopencv_imgproc -lcuda -lcudart -o filter 
 
