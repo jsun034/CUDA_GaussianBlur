@@ -1,6 +1,11 @@
 #! /bin/bash
 
+
 rm filter
-rm kernels.o
-nvcc -c kernels.cu
-nvcc -ccbin g++ -Xcompiler "-std=c++11" kernels.o main.cpp lodepng.cpp helpers.cpp -lcuda -lcudart -o filter
+
+rm blur.o
+
+nvcc -c blur.cu
+
+nvcc -ccbin g++ blur.o main.cpp -I/usr/include/opencv -lopencv_core -lopencv_highgui -lopencv_imgproc -lcuda -lcudart -o filter 
+

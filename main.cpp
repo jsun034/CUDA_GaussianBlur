@@ -1,64 +1,75 @@
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
 #include <iostream>
-#include <cstdlib>
-#include "lodepng.h"
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include "kernels.h"
-#include <functional>
+#include "util.cpp"
+#include <string>
+#include <stdio.h>
 
 
-int main(int argc, char** argv) {
-    if(argc != 3) {
-        std::cout << "Run with input and output image filenames." << std::endl;
-        return 0;
-    }
+using namespace cv;
 
-    // Read the arguments
-    const char* input_file = argv[1];
-    const char* output_file = argv[2];
+size_t numRows();  
+size_t numCols(); 
 
-    std::vector<unsigned char> in_image;
-    unsigned int width, height;
+void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
+                uchar4 **d_inputImageRGBA, uchar4 **d_outputImageRGBA,
+                unsigned char **d_redBlurred,
+                unsigned char **d_greenBlurred,
+                unsigned char **d_blueBlurred,
+                const std::string& filename);
 
-    // Load the data
-    unsigned error = lodepng::decode(in_image, width, height, input_file);
-    if(error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+void postProcess(const std::string& output_file);
 
-    // Prepare the data
-    unsigned char* input_image = new unsigned char[(in_image.size()*3)/4];
-    unsigned char* output_image = new unsigned char[(in_image.size()*3)/4];
-    int where = 0;
-    for(int i = 0; i < in_image.size(); ++i) {
-       if((i+1) % 4 != 0) {
-           input_image[where] = in_image.at(i);
-           output_image[where] = 255;
-           where++;
-       }
-    }
+void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_inputImageRGBA,
+                        uchar4* const d_outputImageRGBA,
+                        const size_t numRows, const size_t numCols,
+                        unsigned char *d_redBlurred,
+                        unsigned char *d_greenBlurred,
+                        unsigned char *d_blueBlurred,
+                        const int filterWidth);
 
-    // Run the filter on it
-    filter(input_image, output_image, width, height); 
+void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsImage,
+                                const float* const h_filter, const size_t filterWidth);
 
-    // Prepare data for output
-    std::vector<unsigned char> out_image;
-    for(int i = 0; i < in_image.size(); ++i) {
-        out_image.push_back(output_image[i]);
-        if((i+1) % 3 == 0) {
-            out_image.push_back(255);
-        }
-    }
-    
-    // Output the data
-    error = lodepng::encode(output_file, out_image, width, height);
 
-    //if there's an error, display it
-    if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
+int main(int argc, char **argv) {
 
-    delete[] input_image;
-    delete[] output_image;
-    return 0;
+  uchar4 *h_inputImageRGBA,  *d_inputImageRGBA;
+  uchar4 *h_outputImageRGBA, *d_outputImageRGBA;
+  unsigned char *d_redBlurred, *d_greenBlurred, *d_blueBlurred;
 
+  float *h_filter;
+  int    filterWidth;
+
+  std::string input_file;
+  std::string output_file;
+  if (argc == 3) {
+    input_file  = std::string(argv[1]);
+    output_file = std::string(argv[2]);
+  }
+  else {
+    std::cerr << "Usage: ./filter input_file output_file" << std::endl;
+    exit(1);
+  }
+  //load the image and give us our input and output pointers
+  preProcess(&h_inputImageRGBA, &h_outputImageRGBA, &d_inputImageRGBA, &d_outputImageRGBA,
+             &d_redBlurred, &d_greenBlurred, &d_blueBlurred,
+             &h_filter, &filterWidth, input_file);
+
+  allocateMemoryAndCopyToGPU(numRows(), numCols(), h_filter, filterWidth);
+
+  your_gaussian_blur(h_inputImageRGBA, d_inputImageRGBA, d_outputImageRGBA, numRows(), numCols(), d_redBlurred, d_greenBlurred, d_blueBlurred, filterWidth);
+
+  cudaDeviceSynchronize(); 
+
+  //check results and output the blurred image
+  postProcess(output_file);
+
+
+  cudaFree(d_redBlurred);
+  cudaFree(d_greenBlurred);
+  cudaFree(d_blueBlurred);
+
+  return 0;
 }
-
-
-
