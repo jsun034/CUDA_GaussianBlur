@@ -2,8 +2,10 @@
 
 
 rm filter
-
 rm blur.o
+rm blur_flower_300x300.jpg
+rm blur_flower_3000x3000.jpg
+rm blur_flower_1000x1000.jpg
 
 nvcc -c blur.cu
 
