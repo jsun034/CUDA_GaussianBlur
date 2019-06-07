@@ -10,3 +10,4 @@
 
 ## References 
 * http://madsravn.dk/posts/simple-image-processing-with-cuda
+* Nvidia official cuda-c documentation on blurring 
