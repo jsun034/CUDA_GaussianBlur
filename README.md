@@ -6,7 +6,9 @@
 
 ## To Run
 * "./compile.sh" generates an executable named "filter" (may need to change specified file path)
-* ./filter inputImageName outputImageName
+* ./blur.sh (to blur the 3 flower images in the folder "images")
+* ./filter inputImageName outputImageName (to blur your own image)
+
 
 ## References 
 * http://madsravn.dk/posts/simple-image-processing-with-cuda
