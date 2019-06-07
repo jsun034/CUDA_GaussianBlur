@@ -52,7 +52,8 @@ int main(int argc, char **argv) {
     std::cerr << "Usage: ./filter input_file output_file" << std::endl;
     exit(1);
   }
-  //load the image and give us our input and output pointers
+  
+  //loading image
   preProcess(&h_inputImageRGBA, &h_outputImageRGBA, &d_inputImageRGBA, &d_outputImageRGBA,
              &d_redBlurred, &d_greenBlurred, &d_blueBlurred,
              &h_filter, &filterWidth, input_file);
@@ -63,7 +64,7 @@ int main(int argc, char **argv) {
 
   cudaDeviceSynchronize(); 
 
-  //check results and output the blurred image
+  //check/output blurred image
   postProcess(output_file);
 
 
