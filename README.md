@@ -7,3 +7,6 @@
 ## To Run
 * "./compile.sh" generates an executable named "filter" (may need to change specified file path)
 * ./filter inputImageName outputImageName
+
+## References 
+* http://madsravn.dk/posts/simple-image-processing-with-cuda
