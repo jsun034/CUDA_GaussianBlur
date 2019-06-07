@@ -1,7 +1,6 @@
 
 
-__global__
-void gaussian_blur(const unsigned char* const inputChannel,
+__global__ void gaussian_blur(const unsigned char* const inputChannel,
                    unsigned char* const outputChannel,
                    int numRows, int numCols,
                    const float* const filter, const int filterWidth)
@@ -29,8 +28,7 @@ void gaussian_blur(const unsigned char* const inputChannel,
   outputChannel[py*numCols+px] = c;
 }
 
-//This kernel takes in an image represented as a uchar4 and splits
-//it into three images consisting of only one color channel each
+// split into rgb channels
 __global__
 void separateChannels(const uchar4* const inputImageRGBA,
                       int numRows,
@@ -51,9 +49,7 @@ void separateChannels(const uchar4* const inputImageRGBA,
   blueChannel[i] = inputImageRGBA[i].z;
 }
 
-//This kernel takes in three color channels and recombines them
-//into one image.  The alpha channel is set to 255 to represent
-//that this image has no transparency.
+// combine color channels
 __global__
 void recombineChannels(const unsigned char* const redChannel,
                        const unsigned char* const greenChannel,
@@ -67,8 +63,7 @@ void recombineChannels(const unsigned char* const redChannel,
 
   const int thread_1D_pos = thread_2D_pos.y * numCols + thread_2D_pos.x;
 
-  //make sure we don't try and access memory outside the image
-  //by having any threads mapped there return early
+  // check out-of-bounds
   if (thread_2D_pos.x >= numCols || thread_2D_pos.y >= numRows)
     return;
 
@@ -76,7 +71,7 @@ void recombineChannels(const unsigned char* const redChannel,
   unsigned char green = greenChannel[thread_1D_pos];
   unsigned char blue  = blueChannel[thread_1D_pos];
 
-  //Alpha should be 255 for no transparency
+  //255 is for no transparency
   uchar4 outputPixel = make_uchar4(red, green, blue, 255);
 
   outputImageRGBA[thread_1D_pos] = outputPixel;
@@ -89,16 +84,16 @@ void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsI
                                 const float* const h_filter, const size_t filterWidth)
 {
 
-  //allocate memory for the three different channels
+  //mem for 3 mem channels
   cudaMalloc(&d_red,   sizeof(unsigned char) * numRowsImage * numColsImage);
   cudaMalloc(&d_green, sizeof(unsigned char) * numRowsImage * numColsImage);
   cudaMalloc(&d_blue,  sizeof(unsigned char) * numRowsImage * numColsImage);
 
   
-  //Allocate memory for the filter on the GPU
+  //Allocate mem for filter
   cudaMalloc(&d_filter, sizeof(float) * filterWidth * filterWidth);
 
-  //Copy the filter on the host 
+  //copy filter on host
   cudaMemcpy(d_filter, h_filter, sizeof(float) * filterWidth * filterWidth, cudaMemcpyHostToDevice);
 }
 
@@ -109,26 +104,25 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
                         unsigned char *d_blueBlurred,
                         const int filterWidth)
 {
-  //Set reasonable block size (num threads per block)
+  //set threads per block
   const dim3 blockSize(16,16,1);
 
-  //Compute grid size 
+  //calc grid size
   const dim3 gridSize(numCols/blockSize.x+1,numRows/blockSize.y+1,1);
 
-  //Launch kernel for separating the RGBA image into different color channels
+  //separate color channels
   separateChannels<<<gridSize, blockSize>>>(d_inputImageRGBA,numRows,numCols,d_red,d_green,d_blue);
 
   cudaDeviceSynchronize();
 
-  //Call your convolution kernel here 3 times, once for each color channel.
+  // call blur for each channel
   gaussian_blur<<<gridSize, blockSize>>>(d_red,d_redBlurred,numRows,numCols,d_filter,filterWidth);
   gaussian_blur<<<gridSize, blockSize>>>(d_green,d_greenBlurred,numRows,numCols,d_filter,filterWidth);
   gaussian_blur<<<gridSize, blockSize>>>(d_blue,d_blueBlurred,numRows,numCols,d_filter,filterWidth);
 
   cudaDeviceSynchronize(); 
 
-  // Now we recombine your results. We take care of launching this kernel for you.
-  // This kernel launch depends on the gridSize and blockSize variables which you set yourself.
+  // recombine channels to final image
   recombineChannels<<<gridSize, blockSize>>>(d_redBlurred,
                                              d_greenBlurred,
                                              d_blueBlurred,
